@@ -1,5 +1,5 @@
 {
-  "part1": [
+  [
     "44",
     "666",
     "667",
@@ -145,9 +145,7 @@
     "Wild",
     "Witch",
     "Wrathful",
-    "Zombie"
-  ],
-  "part2": [
+    "Zombie",
     "Abominator",
     "Aeroplane",
     "Agony",
