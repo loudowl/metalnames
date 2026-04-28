@@ -1,0 +1,110 @@
+#!/usr/bin/env node
+
+const metalnames = require("../src");
+const pkg = require("../package.json");
+
+const args = process.argv.slice(2);
+
+const printHelp = () => {
+  const helpText = `
+metalnames - generate metal-style names
+
+Usage:
+  metalnames [options]
+
+Options:
+  -c, --count <n>   Number of names to generate (default: 1)
+  -s, --short       Favor shorter generated names (2 words)
+  -j, --json        Output JSON array
+  -h, --help        Show this help text
+  -v, --version     Show package version
+`;
+
+  console.log(helpText.trim());
+};
+
+const parseOptions = (argv) => {
+  const options = {
+    count: 1,
+    short: false,
+    json: false
+  };
+
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+
+    if (arg === "-h" || arg === "--help") {
+      options.help = true;
+      continue;
+    }
+
+    if (arg === "-v" || arg === "--version") {
+      options.version = true;
+      continue;
+    }
+
+    if (arg === "-s" || arg === "--short") {
+      options.short = true;
+      continue;
+    }
+
+    if (arg === "-j" || arg === "--json") {
+      options.json = true;
+      continue;
+    }
+
+    if (arg === "-c" || arg === "--count") {
+      const value = argv[i + 1];
+      if (value === undefined) {
+        throw new Error(`Missing value for ${arg}`);
+      }
+
+      const parsed = Number.parseInt(value, 10);
+      if (!Number.isFinite(parsed) || parsed <= 0) {
+        throw new Error(`Invalid count: ${value}`);
+      }
+
+      options.count = parsed;
+      i += 1;
+      continue;
+    }
+
+    throw new Error(`Unknown option: ${arg}`);
+  }
+
+  return options;
+};
+
+try {
+  const options = parseOptions(args);
+
+  if (options.help) {
+    printHelp();
+    process.exit(0);
+  }
+
+  if (options.version) {
+    console.log(pkg.version);
+    process.exit(0);
+  }
+
+  const generated = metalnames.generateMany(options.count, {
+    includeThirdWord: !options.short
+  });
+
+  if (options.json) {
+    console.log(JSON.stringify(generated, null, 2));
+    process.exit(0);
+  }
+
+  if (generated.length === 1) {
+    console.log(generated[0]);
+    process.exit(0);
+  }
+
+  generated.forEach((name) => console.log(name));
+} catch (error) {
+  console.error(`Error: ${error.message}`);
+  console.error("Use --help to see available options.");
+  process.exit(1);
+}
